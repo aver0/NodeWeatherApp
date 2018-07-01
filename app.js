@@ -1,9 +1,27 @@
-const request = require('request');
+const yargs = require('yargs');
+const geocode = require('./geocode/geocode.js');
 
-request({
-  url: 'https://maps.googleapis.com/maps/api/geocode/json?address=1301%20lombard%20street%20philadelphia&key=AIzaSyAsboCLU6JSO1jLllw5RReLTOMvdBslo7g',
-  json: true
-}, (error, response, body) => {
-  console.log(`Lat: ${body.results[0].geometry.location.lat}`);
-  console.log(`Lng: ${body.results[0].geometry.location.lng}`);
+const argv = yargs
+  .options({ // Set the options for our app
+    address: { // This is the first option i.e. address 
+      demand: true, // We want to enfore this argument
+      alias: 'a', // Setting the alias. Call it by using 'node app.js --a'
+      describe: 'Address to get the weather from', // A description of the command
+      string: true // Makes sure the vale of the address is a string
+    }
+  })
+  .help() // Adds the help flag
+  .alias('help', 'h') // Set an alias for the help argument
+  .argv; // Takes the entire configuration, runs it through the arugments and stores the result in the argv variable 
+
+console.log(`Retrieving information for address: '${argv.address}'`);
+
+geocode.geocodeAddress(argv.address, (errorMessage, results) => {
+  if(errorMessage) {
+    console.log(errorMessage);
+  } else {
+    console.log(JSON.stringify(results, undefined, 2));
+  }
 });
+
+
